@@ -36,8 +36,7 @@ sales_by_day <- sales %>%
   summarise(TotalRev = sum(REVENUE))
 
 ggplot(sales_by_day, aes(x = DATE_ORDER, y = TotalRev/1000000))+
-  geom_point()+
-  geom_smooth(method = "loess")
+  geom_line()
 
 sales_by_day_prod <- sales %>%
   group_by(DATE_ORDER, PROD_ID) %>%
@@ -76,6 +75,33 @@ hchart(sales_by_prod, "treemap", hcaes(x = PROD_ID, value = Perc, color = TotalR
 # By far P7 is the most important to the company revenue followed by P2, P5 and P8.
 # Togheter they are responsible for more than 87% of the Total Revenue.
 
+### Analisar preços máx e min
 
-  
+
+# Forecasting with ARIMA
+# Time series with trends, or with seasonality, are not stationary - the trend 
+# and seasonality will affect the value of the time series at different times. 
+
+library(forecast)
+
+sales_ts <- ts(sales_by_day$TotalRev, start = 1 , frequency = 287)
+plot(sales_ts)
+
+sales_ts_fc1 <- forecast(sales_ts, h = 10)  
+sales_ts_fc1
+auto.arima(sales_ts)
+sales_ts_arima <- arima(sales_ts, order = c(2, 0, 1))
+sales_ts_fc_2 <- forecast.Arima(sales_ts_arima, h = 10)
+sales_ts_fc_2
+plot(forecast(sales_ts_fc_2, h=10))
+summary(sales_ts_arima)
+
+# Forecasting with ANN
+library(caret)
+sales_ts_ann <- data.frame(ts(sales_by_day$TotalRev, start = 1 , frequency = 287))
+fit  <- avNNet(TotalRev ~ ., data=sales_by_day, repeats=25, size=3, decay=0.1,
+               linout=TRUE)
+
+plot(forecast(fit, h = 10))
+
 
