@@ -142,15 +142,8 @@ fulldata[is.na(fulldata)] <- 0
 # Correlation plot
 library(corrplot)
 corr_Matrix <- cor(fulldata[,2:11])
-corrplot(corr_Matrix, method = "circle")
-
-
-
-
-
-
-
-
+par(mar = c(5, 4, 4, 2))
+corrplot(corr_Matrix, method = "number")
 
 library(highcharter)
 
@@ -169,24 +162,21 @@ hchart(sales_by_prod, "treemap", hcaes(x = PROD_ID, value = Perc, color = TotalR
 # By far P7 is the most important to the company revenue followed by P2, P5 and P8.
 # Togheter they are responsible for more than 87% of the Total Revenue.
 
-### Analisar preços máx e min
-
-
 # Forecasting with ARIMA
 # Time series with trends, or with seasonality, are not stationary - the trend 
 # and seasonality will affect the value of the time series at different times. 
 
 library(forecast)
 
-sales_ts <- ts(sales_by_day$TotalRev, start = 1, end = 287, frequency = 1)
-plot.ts(sales_ts)
+sales_totRev <- ts(fulldata$TotalRev, start = 1, end = 287, frequency = 1)
+plot.ts(sales_totRev)
 
-sales_ts_fc1 <- forecast(sales_ts, h = 10)  
-sales_ts_fc1
+sales_ts_TotRev <- forecast(sales_totRev, h = 15)  
+sales_ts_TotRev
 # residuals
-plot.ts(sales_ts_fc1$residuals)
+plot.ts(sales_ts_TotRev$residuals)
 # error histogram
-plotForecastErrors(sales_ts_fc1$residuals)
+plotForecastErrors(sales_ts_TotRev$residuals)
 
 # The plot shows that the distribution of forecast errors is roughly 
 # centred on zero, and is more or less normally distributed.
@@ -221,21 +211,21 @@ Box.test(sales_ts_arima$residuals, lag=20, type="Ljung-Box")
 library(e1071)
 # Separating train and test datasets
 library(caTools)
-sales_ts_nn$ts <- seq(1, 287, 1)
+sales_ts_nn <- as.data.frame(sales_ts)[,2:11]
 split2 = sample.split(sales_ts_nn, SplitRatio = 0.85)
 train_nn <- subset(sales_ts_nn, split2 == TRUE)
 val_nn <- subset(sales_ts_nn, split2 == FALSE)
 
-model_svm <- svm(sales_ts ~ . , data = train_nn, scale = TRUE, kernel = 'radial',
+model_svm <- svm(log(TotalRev+1) ~ . , data = train_nn, scale = TRUE, kernel = 'radial',
                  cachesize = 800, cross = 5, epsilon = 0.2)
 
 svm_val <- predict(model_svm, val_nn)
 
-error <- val_nn$sales_ts - svm_val
+error <- log(val_nn$TotalRev+1) - svm_val
 RMSE <- rmse(error)
 RMSE
 
-plot(val_nn$sales_ts, svm_val)
+plot(log(val_nn$TotalRev+1), svm_val)
 
 tuneResult <- tune(svm, sales_ts ~ . , data = train_nn,scale = TRUE, kernel = 'radial',
                    cachesize = 800, ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9)))
@@ -277,7 +267,7 @@ price_prod_by_day <- sales %>%
 
 library(data.table)
 
-Price_data <- merge(price_by_day, price_prod_by_day, by = c("Day", "PROD, all = TRUE)
+Price_data <- merge(price_by_day, price_prod_by_day, by = c("Day", "PROD", all = TRUE)
 
 
 
@@ -288,7 +278,7 @@ Price_data <- merge(price_by_day, price_prod_by_day, by = c("Day", "PROD, all = 
 
 ggplot(comp_prices, aes(x = Day, y = COMPETITOR_PRICE))+
         geom_line(mapping = aes(color = COMPETITOR))+
-        facet_grid( ~ PROD_ID, scales = "free")
+        facet_grid( ~ PROD_ID)
 
 
 ##### functions
