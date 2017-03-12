@@ -16,8 +16,16 @@ rmse <- function(error)
 # each product given a prescribed price. Along with the statistical model, we need metrics, relationships and
 # descriptions of these data in order to understand the sales behavior. What does the data tell us? How are
 # the different data sources related? Is there a particular competitor that seems more important?
-#
+
+
 P3 <- read.csv("PROD_3.csv", sep = " ", header = TRUE, stringsAsFactors = FALSE)
+P3$PROD_ID <- NULL
+library(lubridate)
+
+P3$day <- as.numeric(as.factor(wday(P3$DATE_ORDER)))
+P3$month <- as.numeric(as.factor(month(P3$DATE_ORDER)))
+P3$REVENUE <- NULL
+
 
 # Correlation
 cor(P3$QTY_ORDER, P3$Price)
@@ -29,22 +37,28 @@ plot(log(P3$Price), log(P3$QTY_ORDER))
 
 regp3 <- lm(log(P3$QTY_ORDER) ~ log(P3$Price), data = P3)
 plot(log(P3$Price), log(P3$QTY_ORDER))
-abline(regp3)
+abline(regp3, col = "red")
 
 # Model P2
-data_P3 <- P3[,3:5]
+data_P3 <- P3[,2:5]
 
 library(caTools)
 # Split fulldata into train and test
-split = sample.split(data_P3$Price, SplitRatio = 0.80)
+set.seed(12345)
+split = sample.split(data_P3$Price, SplitRatio = 0.90)
 train <- subset(data_P3, split == TRUE)
 val <- subset(data_P3, split == FALSE)
 
 library(e1071)
 
 model_svm <- tune(svm, QTY_ORDER ~ ., data = train, scale = TRUE, kernel = 'radial',
-                  cachesize = 1800, ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9)))
+                  cachesize = 2500, ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9)))
 
+print(model_svm)
+plot(model_svm)
+
+model_svm <- tune(svm, QTY_ORDER ~ ., data = train, scale = TRUE, kernel = 'radial',
+                  cachesize = 2000, ranges = list(epsilon = seq(0.2,0.55,0.01), cost = 2^(2:9)))
 print(model_svm)
 plot(model_svm)
 
@@ -63,6 +77,7 @@ results <- as.data.frame(cbind(val, results))
 
 rdois <- lm(QTY_ORDER ~ results, data = results)
 summary(rdois)$r.squared
+# r^2  = 0.527
 
 plot(results$QTY_ORDER, results$results)
 abline(0,1, col = "red")
