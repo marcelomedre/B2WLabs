@@ -5,9 +5,8 @@ Script: B2W_Pric_challenge_EDA_Products.R contains the Exploratory Analysis of t
 
 ## Describing the entire Analysis and Modeling
 
+## 1. Exploratory Data Analysis - Products. <br>
 "Script B2W_Pric_challenge_EDA_Products.R"
-
-1. Exploratory Data Analysis - Products. <br>
 
 Once I had almost no idea about the business itself I started my analysis trying to get some insights about the most important product in terms of revenue and quantity sold in the entire period. <br>
 
@@ -67,13 +66,14 @@ Product 9 <br>
 Seasonal behavior observed "minor" in May and big August-September. <br>
 Quantity ordered strongly negative correlated with Price - Correlation Qty_Order x Price = -0.79. <br>
 
-2. Correlation Our Prices x Competitors Prices <br>
+## 2. Correlation Our Prices x Competitors Prices <br>
 "Script B2W_PrChall_Correlation_01.R" <br>
+
 In this script the matrices of the prices of our products and our competitors prices pay_types 1 and 2 were built.
 To calculate the correlation matrices only the variables with more than 100 observations were used.
 A few outliers were found and relaced by the mean value of the variable.
 
-General Overview of the results:
+## General Overview of the results:
 
 Product 1 <br>
 Our prices are weakly correlated with COMPETITOR 6 Prices, PAY-TYPE's 1 and 2 equally. <br>
