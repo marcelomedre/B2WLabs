@@ -126,3 +126,19 @@ Is there a particular competitor that seems more important?
 Considering that the products 7, 2, 5 and 8 are the most important for our revenue and volume.
 I could be thought that the COMPETITORS 1 and 3 seems to be more important to our business, because 
 we are pricing our TOP volume/revenue products like these COMPETITORS.
+
+## 3. MoModels for Demand Forecasting <br>
+
+###Product 1.
+In the script "Model_Prod_1.R" the model to predict the quantity sold given a prescribed price
+were built using an ANN type Multilayer Perceptron and a Support Vector Machine.
+
+The starting point was a rough linear model called regP1 which presented a R^2 = 0.40.
+
+Multilayer Perceptron - 3 hidden neurons and learnrate = 0.05, leading to a R^2 = 0.53.
+
+SVM model with 41 radial kernels, gamma = 0.33, cost = 1, episilon = 0.1, presented a R^2 = 0.63 in the test dataset and
+R^2 = 0.6455 in the full dataset.
+
+
+

@@ -150,37 +150,7 @@ ggplot(full_data, aes(x = Price, y = QTY_ORDER))+
 rdois_full <- lm(full_data$QTY_ORDER ~ full_data$ANN_QTY, data = full_data)
 summary(rdois_full)$r.squared
 # r^2 = 0.53
-#******************************************************************
 
-nn <- neuralnet(f, train_nn, rep = 50, hidden = 5, threshold = 0.0001,
-                linear.output = FALSE)
-
-plot(nn)
-
-# Compute predictions
-
-predicted <- compute(nn, val_nn)
-
-print(head(predicted$net.result))
-
-results <- as.data.frame(cbind(val_nn, val_resp, predicted$net.result))
-
-error <- val_resp - predicted$net.result
-RMSE <- rmse(error)
-RMSE
-
-# r2 validation sample
-
-rdois <- lm(val_resp ~ predicted$net.result, data = results)
-summary(rdois)$r.squared
-#r^2 = 0.617
-
-plot(results$val_resp, predicted$net.result)
-abline(0,1, col = "red")
-
-ggplot(results, aes(x = Price, y = val_resp))+
-        geom_point(size = 4)+
-        geom_point(aes(y = predicted$net.result), col = "red")
 #*******************************************************************************
 # SVM Model
 library(e1071)
@@ -191,66 +161,43 @@ train <- subset(data_P2, split == TRUE)
 val <- subset(data_P2, split == FALSE)
 
 model_svm <- svm(f, data = train, scale = TRUE, kernel = 'radial',
-                     cachesize = 1600, cross = 5, epsilon = 0.2)
+                     cachesize = 1600, cross = 5, epsilon = 0.1)
 
 svm_val <- predict(model_svm, val)
 
 results_svm <- as.data.frame(cbind(val, svm_val))
 
-error <- results_svm$QTY_ORDER - svm_val
-RMSE <- rmse(error)
-RMSE
+RMSE_SVM <-  sqrt(mean(results_svm$QTY_ORDER - svm_val)^2)
+RMSE_SVM
+
+summary(model_svm)
 
 # r2 validation sample
 
 rdois <- lm(QTY_ORDER ~ svm_val, data = results_svm)
 summary(rdois)$r.squared
-#r^2 = 0.60
-
-plot(results_svm$QTY_ORDER, results_svm$svm_val)
-abline(0,1, col = "red")
-abline(rdois, col = "blue")
+#r^2 = 0.6329
 
 ggplot(results_svm, aes(x = Price, y = QTY_ORDER))+
   geom_point(size = 4)+
-  geom_point(aes(y = results_svm$svm_val), col = "red")
+  geom_point(aes(y = results_svm$svm_val), col = "red")+
+        xlab("Preço")+
+        ylab("Quantidade P1")
 
+svm_full <- predict(model_svm, data_P2)
 
-# Refining model
+full_results_svm <- as.data.frame(cbind(data_P2, svm_full))
 
-model_svm <- tune(svm, f, data = train, scale = TRUE, kernel = 'radial',
-                  cachesize = 2000, ranges = list(epsilon = seq(0,1,0.1), cost = 2^(2:9)))
-
-print(model_svm)
-plot(model_svm)
-
-model_svm <- tune(svm, f, data = train, scale = TRUE, kernel = 'radial',
-                  cachesize = 2000, ranges = list(epsilon = seq(0.2,0.6,0.01), cost = 2^(2:6)))
-print(model_svm)
-plot(model_svm)
-
-summary(model_svm)
-model_P1 <- model_svm$best.model
-
-results_svm <- predict(model_P1, val)
-
-results_svm_ref <- as.data.frame(cbind(val, results_svm))
-
-error <- results_svm_ref$QTY_ORDER - results_svm
-RMSE <- rmse(error)
-RMSE
+RMSE_SVM <-  sqrt(mean(full_results_svm$QTY_ORDER - svm_full)^2)
+RMSE_SVM
 
 # r2 validation sample
+rdois_2 <- lm(QTY_ORDER ~ svm_full, data = full_results_svm)
+summary(rdois_2)$r.squared
+#r^2 = 0.65
 
-rdois <- lm(QTY_ORDER ~ results_svm, data = results_svm_ref)
-summary(rdois)$r.squared
-#r^2 = 0.60
-
-plot(results_svm_ref$QTY_ORDER, results_svm_ref$results_svm)
-abline(0,1, col = "red")
-abline(rdois, col = "blue")
-
-ggplot(results_svm_ref, aes(x = Price, y = QTY_ORDER))+
-  geom_point(size = 4)+
-  geom_point(aes(y = results_svm_ref$results_svm), col = "red")
-
+ggplot(full_results_svm, aes(x = Price, y = QTY_ORDER))+
+        geom_point(size = 4)+
+        geom_point(aes(y = full_results_svm$svm_full), col = "red")+
+        xlab("Preço")+
+        ylab("Quantidade P1")
