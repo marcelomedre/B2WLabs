@@ -1,13 +1,6 @@
-setwd("C:/Users/Marcelo/Desktop/Data/B2WLabs/")
+setwd("C:/Users/Marcelo/Desktop/Data Science/B2W Labs/B2WLabs/")
 
 rm(list = ls())
-
-# Function
-
-rmse <- function(error)
-{
-        sqrt(mean(error^2))
-}
 
 # B2W LABs | Pricing Challenge
 
@@ -17,6 +10,7 @@ rmse <- function(error)
 # descriptions of these data in order to understand the sales behavior. What does the data tell us? How are
 # the different data sources related? Is there a particular competitor that seems more important?
 #
+
 library(ggplot2)
 P1_sales_by_weekday_month <- read.csv("P1_sales_by_weekday_month.csv", header = TRUE, stringsAsFactors = FALSE)
 
@@ -201,3 +195,15 @@ ggplot(full_results_svm, aes(x = Price, y = QTY_ORDER))+
         geom_point(aes(y = full_results_svm$svm_full), col = "red")+
         xlab("Preço")+
         ylab("Quantidade P1")
+
+ggplot()+
+  geom_point(data = full_results_svm, aes(x = 1:63, y = QTY_ORDER, 
+                                        size = Price, group = day, color = factor(month)))+
+  geom_line(data = full_results_svm, aes(x = 1:63, y = QTY_ORDER), col = "blue")+
+  geom_point(data = full_results_svm, aes(x = 1:63, y = svm_full, size = Price), pch = 4, col = "red")+
+  xlab("Weekdays per Month")+
+  ylab("Weekdays Sales Product 1")+
+  ggtitle("Weekday Sales Product 1 - SVM Model")+
+  theme(axis.text=element_text(size=12, face = "bold"),
+        axis.title=element_text(size=14,face="bold"))+
+  annotate("text", x = 5, y = 150, label = "R^2 = 0.65")
